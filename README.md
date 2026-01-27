@@ -52,9 +52,3 @@ npm run dev
 Open your browser and navigate to:
 - **Frontend App**: `http://localhost:5173`
 - **Backend API Docs**: `http://localhost:8080/swagger-ui.html` (if Swagger is enabled)
-
-## 📄 Documentation
-
-For detailed instructions on each part of the system, please refer to their respective README files:
-- 📘 [Frontend Documentation](./FoE-Frontend-main/README.md)
-- 📗 [Backend Documentation](./FoE-Backend-main/README.md)
