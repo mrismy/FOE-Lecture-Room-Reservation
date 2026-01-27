@@ -8,6 +8,12 @@ bin/
 .DS_Store
 **/.DS_Store
 
+# Local-only config overrides (do not commit secrets)
+application-local.properties
+application-dev.properties
+.env
+.env.*
+
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -39,4 +45,3 @@ build/
 
 ### VS Code ###
 .vscode/
-src/main/resources/application.properties
