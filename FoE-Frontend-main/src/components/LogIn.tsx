@@ -1,10 +1,11 @@
 import { FieldValues, useForm } from 'react-hook-form';
 import logo from '../assets/logo.png';
 import { AxiosError } from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { HiUser, HiLockClosed } from 'react-icons/hi';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { useState } from 'react';
+import { login, startOAuth2Flow } from '../services/AuthService';
 
 const LoginIn = () => {
   const navigate = useNavigate();
@@ -17,8 +18,8 @@ const LoginIn = () => {
 
   const onSignIn = async (data: FieldValues) => {
     try {
-      await signin({
-        userName: data.username,
+      await login({
+        email: data.username,
         password: data.password,
       });
       console.log('User login successful');
@@ -144,12 +145,26 @@ const LoginIn = () => {
             )}
 
             {/* Sign in Button */}
-            <div>
+            <div className="space-y-3">
               <button
                 type="submit"
                 className="w-full bg-indigo-600 text-white py-2 rounded-md shadow-md hover:bg-indigo-500 focus:ring-2 focus:ring-indigo-500">
                 Sign in
               </button>
+
+              <button
+                type="button"
+                onClick={() => startOAuth2Flow()}
+                className="w-full bg-white border border-gray-300 text-gray-800 py-2 rounded-md shadow-sm hover:bg-gray-50">
+                Continue with Google
+              </button>
+
+              <div className="text-center text-sm text-gray-600">
+                Don&apos;t have an account?{' '}
+                <Link className="text-indigo-600 hover:underline" to="/auth/register">
+                  Register
+                </Link>
+              </div>
             </div>
           </form>
         </div>

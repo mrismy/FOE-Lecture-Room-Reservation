@@ -112,7 +112,7 @@ const BookingForm = () => {
       setFetch(true);
     } catch (error) {
       const errorMessage =
-        (error as AxiosError).response?.data?.message ||
+        ((error as AxiosError).response?.data as any)?.message ||
         'Error in adding booking';
       setErrorMessage(errorMessage);
       console.error(errorMessage);

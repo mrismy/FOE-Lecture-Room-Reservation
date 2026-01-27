@@ -1,12 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
 import './App.css';
 import getMonth, { getDay, getWeek } from './util';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import CalendarHeader from './components/booking/calendar/CalendarHeader';
 import DayView from './components/booking/calendar/DayView';
 import Month from './components/booking/calendar/MonthView';
 import WeekView from './components/booking/calendar/WeekView';
-import LoginUser from './services/AuthService';
+import LoginIn from './components/LogIn';
 import ListRoom from './components/room/ListRoom';
 import GlobalContext from './context/GlobalContext';
 import NavBar from './components/NavBar';
@@ -15,6 +15,7 @@ import InfoPage from './components/InfoPage';
 import LoginErrorPage from './components/LoginErrorPage';
 import OAuthSuccess from './components/OAuthSuccess';
 import { AuthProvider } from './context/AuthContext';
+import Register from './components/Register';
 
 function App() {
   const { monthIndex, weekIndex, dayIndex } = useContext(GlobalContext);
@@ -31,7 +32,7 @@ function App() {
   }, [weekIndex]);
 
   useEffect(() => {
-    setCurretDay(getDay(dayIndex));
+    setCurretDay(getDay());
   }, [dayIndex]);
 
   // console.table(getMonth(3))
@@ -41,7 +42,8 @@ function App() {
       <BrowserRouter>
         <NavBar />
         <Routes>
-          <Route path="/auth/login" element={<LoginUser />}></Route>
+          <Route path="/auth/login" element={<LoginIn />}></Route>
+          <Route path="/auth/register" element={<Register />}></Route>
           <Route path="/oauth-success" element={<OAuthSuccess />} />
           <Route path="/login-error" element={<LoginErrorPage />}></Route>
           <Route

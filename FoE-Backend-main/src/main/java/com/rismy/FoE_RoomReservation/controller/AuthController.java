@@ -15,12 +15,17 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rismy.FoE_RoomReservation.dto.LoginRequestDto;
+import com.rismy.FoE_RoomReservation.dto.RegisterRequestDto;
 import com.rismy.FoE_RoomReservation.dto.ResponseDto;
 import com.rismy.FoE_RoomReservation.dto.UserDto;
+import com.rismy.FoE_RoomReservation.repository.UserRepository;
+import com.rismy.FoE_RoomReservation.service.impl.AuthServiceImpl;
 import com.rismy.FoE_RoomReservation.service.impl.JwtTokenProvider;
 import com.rismy.FoE_RoomReservation.service.impl.UserServiceImpl;
 
@@ -33,65 +38,100 @@ public class AuthController {
 
 	private final UserServiceImpl userService;
 	private final JwtTokenProvider jwtTokenProvider;
+	private final AuthServiceImpl authService;
+	private final UserRepository userRepository;
 
 	@Autowired
-	public AuthController(UserServiceImpl userService, JwtTokenProvider jwtTokenProvider) {
+	public AuthController(UserServiceImpl userService, JwtTokenProvider jwtTokenProvider, AuthServiceImpl authService,
+			UserRepository userRepository) {
 		this.userService = userService;
 		this.jwtTokenProvider = jwtTokenProvider;
+		this.authService = authService;
+		this.userRepository = userRepository;
 	}
 
-	@GetMapping("/login")
-	public ResponseEntity<ResponseDto> login(Authentication authentication) {
-		ResponseDto response = userService.login(authentication);
-		return ResponseEntity.status(response.getStatusCode()).body(response);
+	@PostMapping("/register")
+	public ResponseEntity<ResponseDto> register(@RequestBody RegisterRequestDto request, HttpServletResponse response) {
+		ResponseDto res = authService.register(request);
+		if (res.getStatusCode() != 200) {
+			return ResponseEntity.status(res.getStatusCode()).body(res);
+		}
+
+		// set refresh cookie
+		String refreshToken = jwtTokenProvider.generateRefreshToken(res.getUser());
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.secure(true)
+				.path("/auth/refresh")
+				.maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+				.sameSite("Lax")
+				.build();
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+		return ResponseEntity.ok(res);
 	}
 
+	@PostMapping("/login")
+	public ResponseEntity<ResponseDto> loginLocal(@RequestBody LoginRequestDto request, HttpServletResponse response) {
+		ResponseDto res = authService.login(request);
+		if (res.getStatusCode() != 200) {
+			return ResponseEntity.status(res.getStatusCode()).body(res);
+		}
+		String refreshToken = jwtTokenProvider.generateRefreshToken(res.getUser());
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.secure(true)
+				.path("/auth/refresh")
+				.maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+				.sameSite("Lax")
+				.build();
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+		return ResponseEntity.ok(res);
+	}
+
+	// Google OAuth login callback still uses /auth/me + /auth/refresh etc.
 	@GetMapping("/me")
 	public ResponseEntity<ResponseDto> getCurrentUser(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
-		// Verify the token is present
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		String token = authHeader.substring(7); // Remove the bearer part
-
-		// Extract user information from JWT
+		String token = authHeader.substring(7);
 		String email = jwtTokenProvider.getUsernameFromToken(token);
 		return ResponseEntity.status(200).body(userService.getUserByEmail(email));
 	}
 
 	@GetMapping("/refresh")
-	public ResponseEntity<ResponseDto> refresh(@CookieValue(name = "refreshToken", required = false) String oldRefreshToken,
+	public ResponseEntity<ResponseDto> refresh(
+			@CookieValue(name = "refreshToken", required = false) String oldRefreshToken,
 			HttpServletResponse response) {
-		
-		// If refresh token is not available just pass it
-		if(oldRefreshToken==null) {
-			return ResponseEntity.ok().build();
+
+		if (oldRefreshToken == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
-		
-		// Validate the refresh token
+
 		if (!jwtTokenProvider.validateToken(oldRefreshToken)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		// Get the user from token
 		String username = jwtTokenProvider.getUsernameFromToken(oldRefreshToken);
 		UserDto user = userService.getUserByEmail(username).getUser();
-		
+
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-				user.getEmail(), 
-				null, 
+				user.getEmail(),
+				null,
 				Collections.singletonList(new SimpleGrantedAuthority(String.valueOf(user.getUserType()))));
 
 		SecurityContextHolder.getContext().setAuthentication(authToken);
-		
-		// Generate new tokens
+
 		String accessToken = jwtTokenProvider.generateAccessToken(user);
 		String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-		// Set the cookie
-		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken).httpOnly(true).secure(true)
-				.path("/auth/refresh").maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000).sameSite("Lax")
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+				.httpOnly(true)
+				.secure(true)
+				.path("/auth/refresh")
+				.maxAge(jwtTokenProvider.getRefreshTokenExpiration() / 1000)
+				.sameSite("Lax")
 				.build();
 		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 		return ResponseEntity.ok(ResponseDto.builder().token(accessToken).build());
@@ -100,8 +140,6 @@ public class AuthController {
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken,
 			HttpServletResponse response) {
-		
-		// Immediately invalidate the cookie
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", "")
 				.httpOnly(false)
 				.secure(true)
@@ -109,8 +147,7 @@ public class AuthController {
 				.maxAge(0)
 				.sameSite("Lax")
 				.build();
-		response.addHeader(HttpHeaders.SET_COOKIE,cookie.toString());
-		System.err.println("Logged out");
+		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 		return ResponseEntity.noContent().build();
 	}
 }

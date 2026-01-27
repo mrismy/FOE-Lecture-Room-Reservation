@@ -38,20 +38,25 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(request -> {
 			CorsConfiguration config = new CorsConfiguration();
-			config.setAllowedOrigins(List.of("https://eeu.pdn.ac.lk:3001")); // Allow the frontend origin
-			config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
-			config.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allowed headers
-			config.setAllowCredentials(true); // Allow credentials (cookies, etc.)
+			config.setAllowedOrigins(List.of(allowedCrossOrigin));
+			config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+			config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+			config.setAllowCredentials(true);
 			return config;
-		})).authorizeHttpRequests(request -> request.requestMatchers("/auth/refresh","/user/**", "/room/**", "/booking/**", "/auth/**")
-				.permitAll().anyRequest().authenticated())
-				.oauth2Login(oauth2 -> oauth2
-						.successHandler(successHandler))
-				.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),UsernamePasswordAuthenticationFilter.class)
-				.logout((logout) -> logout
-						.deleteCookies("JSESSIONID", "OAuth2-Token")
-						.clearAuthentication(true)
-						.invalidateHttpSession(true))
-				.build();
+		}))
+			.authorizeHttpRequests(request -> request
+					.requestMatchers(
+							"/auth/login",
+							"/auth/register",
+							"/auth/refresh",
+							"/oauth2/**",
+							"/login-error"
+					).permitAll()
+					.anyRequest().authenticated())
+			.oauth2Login(oauth2 -> oauth2.successHandler(successHandler))
+			.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+			.logout((logout) -> logout.deleteCookies("JSESSIONID", "OAuth2-Token").clearAuthentication(true)
+					.invalidateHttpSession(true))
+			.build();
 	}
 }

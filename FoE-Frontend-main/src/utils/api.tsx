@@ -2,8 +2,10 @@
 import axios from 'axios';
 import { refreshToken } from '../services/AuthService';
 
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8082/';
+
 const api = axios.create({
-  baseURL: 'http://localhost:8082/',
+  baseURL,
   withCredentials: true,
 });
 
@@ -18,14 +20,19 @@ api.interceptors.request.use((config) => {
 
 // Response interceptor
 api.interceptors.response.use(
-  response => response,
-  async error => {
+  (response) => response,
+  async (error) => {
     const originalRequest = error.config;
-    
+
+    // Network errors (server down / wrong port / CORS)
+    if (!error.response) {
+      console.error('Network error calling API:', baseURL);
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
-      console.log("Refresh token fail")
+
       try {
         const newToken = await refreshToken();
         localStorage.setItem('accessToken', newToken);
@@ -33,11 +40,10 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem('accessToken');
-        // window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

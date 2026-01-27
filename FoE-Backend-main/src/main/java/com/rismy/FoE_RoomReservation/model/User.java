@@ -22,91 +22,118 @@ import jakarta.persistence.Table;
 @Table(name = "users")
 public class User {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long userId;
-	@Column(nullable = false)
-	private String firstName;
-	private String lastName;
-	@Column(unique = true, nullable = false)
-	private String email;
-	@Enumerated(EnumType.STRING)
-	private UserType userType;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long userId;
+    @Column(nullable = false)
+    private String firstName;
+    private String lastName;
+    @Column(unique = true, nullable = false)
+    private String email;
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
-	public enum UserType {
-		regularUser, admin, superAdmin
-	}
+    public enum UserType {
+        regularUser, admin, superAdmin
+    }
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Booking> bookings = new ArrayList<Booking>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Booking> bookings = new ArrayList<Booking>();
 
-	public User() {
-	}
+    @Column(nullable = true)
+    private String passwordHash;
 
-	public User(long userId, String firstName, String lastName, String email, UserType userType, List<Booking> bookings) {
-		this.userId = userId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.userType = userType;
-		this.bookings = (bookings != null) ? bookings : new ArrayList<>();
-	}
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
-	public long getUserId() {
-		return userId;
-	}
+    public enum AuthProvider {
+        LOCAL, GOOGLE
+    }
 
-	public void setUserId(long userId) {
-		this.userId = userId;
-	}
+    public User() {
+    }
 
-	public String getFirstName() {
-		return firstName;
-	}
+    public User(long userId, String firstName, String lastName, String email, UserType userType, List<Booking> bookings) {
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.userType = userType;
+        this.bookings = (bookings != null) ? bookings : new ArrayList<>();
+    }
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
+    public long getUserId() {
+        return userId;
+    }
 
-	public String getLastName() {
-		return lastName;
-	}
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
+    public String getFirstName() {
+        return firstName;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getLastName() {
+        return lastName;
+    }
 
-	public UserType getUserType() {
-		return userType;
-	}
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-	public void setUserType(UserType userType) {
-		this.userType = userType;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public List<Booking> getBookings() {
-		return bookings;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public void setBookings(List<Booking> bookings) {
-		this.bookings = (bookings != null) ? bookings : new ArrayList<>();
-	}
+    public UserType getUserType() {
+        return userType;
+    }
 
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(userType.toString()));
-	}
+    public void setUserType(UserType userType) {
+        this.userType = userType;
+    }
 
-	@Override
-	public String toString() {
-		return "User{" + "userId=" + userId + ", firstName='" + firstName + '\'' + ", lastName='" + lastName
-				+ '\'' + ", email='" + email + '\'' + ", userType=" + userType + '}';
-	}
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = (bookings != null) ? bookings : new ArrayList<>();
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public AuthProvider getAuthProvider() {
+        return authProvider;
+    }
+
+    public void setAuthProvider(AuthProvider authProvider) {
+        this.authProvider = authProvider;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(userType.toString()));
+    }
+
+    @Override
+    public String toString() {
+        return "User{" + "userId=" + userId + ", firstName='" + firstName + '\'' + ", lastName='" + lastName
+                + '\'' + ", email='" + email + '\'' + ", userType=" + userType + ", authProvider="
+                + authProvider + '}';
+    }
 }

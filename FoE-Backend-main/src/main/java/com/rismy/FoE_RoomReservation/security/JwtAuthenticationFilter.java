@@ -21,7 +21,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtTokenProvider jwtTokenProvider;
 
-	@Autowired
 	public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
 		this.jwtTokenProvider = jwtTokenProvider;
 	}
@@ -30,9 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
 		
 		String path = request.getRequestURI();
-		if (path.equals("/auth/refresh")) {
-		    filterChain.doFilter(request, response); // don't try to auth
-		    return;
+		if (path.startsWith("/auth/") || path.startsWith("/oauth2/") || path.startsWith("/login")) {
+			filterChain.doFilter(request, response);
+			return;
 		}
 		
 		try {
