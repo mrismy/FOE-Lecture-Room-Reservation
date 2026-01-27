@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { deleteRoom, getAllRooms, getAdminOnlyBookingRooms } from '../../services/RoomService';
 import { AxiosError } from 'axios';
-import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import DeleteConformation from '../DeleteConfirmation';
 import AddRoomForm from './AddRoomForm';
 import GlobalContext from '../../context/GlobalContext';
@@ -13,13 +13,13 @@ import { useAuth } from '../../context/AuthContext';
 
 const ListRoom = () => {
   const authContext = useAuth();
-  
-    if (!authContext) {
-      throw new Error('useAuth must be used within an AuthProvider');
-    }
-  
-    const { user } = authContext;
-    
+
+  if (!authContext) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  const { user } = authContext;
+
   const [roomList, setRoomList] = useState<Room[]>([]);
   const [adminOnlyRoomList, setAdminOnlyRoomList] = useState<Room[]>([]);
   const [errorMessage, setErrorMessage] = useState('');

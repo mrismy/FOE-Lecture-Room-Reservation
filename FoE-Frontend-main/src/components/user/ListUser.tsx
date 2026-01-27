@@ -1,5 +1,5 @@
-import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import { useContext, useEffect, useState } from 'react';
 import { User } from '../Interfaces';
 import { deleteUser, getAllUsers } from '../../services/UserService';

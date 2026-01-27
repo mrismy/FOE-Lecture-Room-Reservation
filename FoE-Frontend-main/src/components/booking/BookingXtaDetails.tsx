@@ -1,6 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
-import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
-import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import dayjs from 'dayjs';
 import { useContext, useState } from 'react';
 import GlobalContext from '../../context/GlobalContext';
@@ -37,12 +37,12 @@ const BookingXtaDetails = ({
   };
 
   const authContext = useAuth();
-  
-    if (!authContext) {
-      throw new Error('useAuth must be used within an AuthProvider');
-    }
-  
-    const { user } = authContext;
+
+  if (!authContext) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+
+  const { user } = authContext;
 
   // Edit and delete booking access
   const accessible =
