@@ -31,8 +31,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/auth")
 public class AuthController {
 
-	private UserServiceImpl userService;
-	private JwtTokenProvider jwtTokenProvider;
+	private final UserServiceImpl userService;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Autowired
 	public AuthController(UserServiceImpl userService, JwtTokenProvider jwtTokenProvider) {
@@ -81,8 +81,8 @@ public class AuthController {
 		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
 				user.getEmail(), 
 				null, 
-				Collections.singletonList(new SimpleGrantedAuthority(user.getUserType().toString())));
-		
+				Collections.singletonList(new SimpleGrantedAuthority(String.valueOf(user.getUserType()))));
+
 		SecurityContextHolder.getContext().setAuthentication(authToken);
 		
 		// Generate new tokens

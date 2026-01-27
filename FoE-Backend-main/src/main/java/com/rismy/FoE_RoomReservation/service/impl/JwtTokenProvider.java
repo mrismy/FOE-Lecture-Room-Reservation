@@ -26,16 +26,23 @@ public class JwtTokenProvider {
     private final long refreshTokenExpiration;
 
     public JwtTokenProvider(
-            @Value("${jwt.secret}") String jwtSecret,
-            @Value("${jwt.access-expiration}") long accessTokenExpiration,
-            @Value("${jwt.refresh-expiration}") long refreshTokenExpiration) {
+            @Value("${jwt.secret:}") String jwtSecret,
+            @Value("${jwt.access-expiration:900000}") long accessTokenExpiration,
+            @Value("${jwt.refresh-expiration:604800000}") long refreshTokenExpiration) {
 
         if (jwtSecret == null || jwtSecret.isBlank()) {
-            throw new IllegalArgumentException("JWT secret is missing");
+            // Dev-friendly fallback: generate an ephemeral secret so the app can boot.
+            // NOTE: tokens issued with this key become invalid on every restart.
+            System.err.println("WARNING: jwt.secret is missing. Generating an ephemeral dev JWT key. "
+                    + "Set JWT_SECRET_BASE64 (or jwt.secret) for a stable signing key.");
+            byte[] random = new byte[32];
+            new java.security.SecureRandom().nextBytes(random);
+            this.key = Keys.hmacShaKeyFor(random);
+        } else {
+            byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+            this.key = Keys.hmacShaKeyFor(keyBytes);
         }
 
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
