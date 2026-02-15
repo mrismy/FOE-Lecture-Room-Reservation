@@ -51,4 +51,4 @@ npm run dev
 ### 3. Access the App
 Open your browser and navigate to:
 - **Frontend App**: `http://localhost:5173`
-- **Backend API **: `http://localhost:8080/`
+- **Backend API**: `http://localhost:8080`
