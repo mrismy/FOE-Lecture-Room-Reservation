@@ -2,14 +2,14 @@
 
 The **FoE Room Reservation System** is a comprehensive full-stack solution for managing and booking lecture halls and seminar rooms at the Faculty of Engineering. It consists of a modern, responsive frontend and a robust backend API.
 
-## 🏗️ Project Structure
+## Project Structure
 
 This monorepo contains two main applications:
 
 - **[Frontend](./FoE-Frontend-main)** (`FoE-Frontend-main`): A React + TypeScript web application built with Vite and Tailwind CSS.
 - **[Backend](./FoE-Backend-main)** (`FoE-Backend-main`): A Spring Boot (Java) REST API facilitating data persistence, authentication, and business logic.
 
-## 🚀 Key Features
+## Key Features
 
 - **Full Stack Architecture**: Separated frontend and backend for scalability.
 - **Secure Authentication**: Google OAuth integration with JWT-based session management.
@@ -17,7 +17,7 @@ This monorepo contains two main applications:
 - **Booking System**: Real-time checking availability and booking capabilities for users.
 - **Role-Based Access**: Distinct features for Students, Staff, and Admins.
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 | Component | Technology | Description |
 | :--- | :--- | :--- |
@@ -28,7 +28,7 @@ This monorepo contains two main applications:
 | | MySQL | Relational Database |
 | | Maven | Dependency Management |
 
-## 🚦 Getting Started
+## Getting Started
 
 To run the full system, you need to start both the backend and frontend servers.
 
