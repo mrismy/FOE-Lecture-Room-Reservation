@@ -51,4 +51,4 @@ npm run dev
 ### 3. Access the App
 Open your browser and navigate to:
 - **Frontend App**: `http://localhost:5173`
-- **Backend API Docs**: `http://localhost:8080/swagger-ui.html` (if Swagger is enabled)
+- **Backend API **: `http://localhost:8080/
