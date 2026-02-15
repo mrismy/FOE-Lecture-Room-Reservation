@@ -15,7 +15,7 @@ This monorepo contains two main applications:
 - **Secure Authentication**: Google OAuth integration with JWT-based session management.
 - **Room Management**: Admin capabilities to create, update, and delete room resources.
 - **Booking System**: Real-time checking availability and booking capabilities for users.
-- **Role-Based Access**: Distinct features for Students, Staff, and Admins.
+- **Role-Based Access**: Distinct features for Staff, and Admins.
 
 ## Technology Stack
 
